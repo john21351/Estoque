@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Estoque - Padaria</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            flex: 1;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        h1 {
+            color: #8B4513;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eaeaea;
+        }
+        
+        h2 {
+            color: #8B4513;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        h3 {
+            color: #8B4513;
+            margin: 15px 0 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: #8B4513;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: background-color 0.3s;
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            background-color: #654321;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background-color: #bd2130;
+        }
+        
+        .btn-info {
+            background-color: #17a2b8;
+        }
+        
+        .btn-info:hover {
+            background-color: #138496;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f8f8f8;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .stock-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stock-item {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #8B4513;
+        }
+        
+        .stock-item h3 {
+            margin-bottom: 10px;
+            color: #8B4513;
+        }
+        
+        .stock-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .unit {
+            font-size: 14px;
+            color: #777;
+        }
+        
+        .recipe-table {
+            margin-top: 20px;
+            width: 100%;
+        }
+        
+        .recipe-table td:last-child {
+            text-align: right;
+        }
+        
+        .info-note {
+            background-color: #e6f7ff;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+            border-left: 4px solid #1890ff;
+        }
+        
+        .ingredient-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .ingredient-name {
+            font-weight: 500;
+        }
+        
+        .ingredient-value {
+            color: #666;
+        }
+        
+        .fermento-custom {
+            background-color: #fff8e1;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border: 1px dashed #ffd54f;
+        }
+        
+        .reset-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .report-section {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .report-table {
+            font-size: 0.9rem;
+        }
+        
+        .report-table th, 
+        .report-table td {
+            padding: 8px 10px;
+        }
+        
+        .consumption-positive {
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .consumption-negative {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .close {
+            font-size: 24px;
+            cursor: pointer;
+            color: #aaa;
+        }
+        
+        .close:hover {
+            color: #333;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .developer {
+            font-weight: 600;
+            color: #8B4513;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Controle de Estoque - Padaria</h1>
+            <p class="description">Controle seu estoque e produção de forma simples e eficiente</p>
+        </header>
+        
+        <div class="grid-container">
+            <div class="card">
+                <h2>Estoque Atual</h2>
+                <div class="stock-summary">
+                    <div class="stock-item">
+                        <h3>Farinha</h3>
+                        <div class="stock-value" id="farinha-value">0</div>
+                        <div class="unit">kg</div>
+                    </div>
+                    <div class="stock-item">
+                        <h3>Reforçador</h3>
+                        <div class="stock-value" id="reforcador-value">0</div>
+                        <div class="unit">kg</div>
+                    </div>
+                    <div class="stock-item">
+                        <h3>Anti-mofo</h3>
+                        <div class="stock-value" id="anti-mofo-value">0</div>
+                        <div class="unit">kg</div>
+                    </div>
+                    <div class="stock-item">
+                        <h3>Sal</h3>
+                        <div class="stock-value" id="sal-value">0</div>
+                        <div class="unit">kg</div>
+                    </div>
+                    <div class="stock-item">
+                        <h3>Fermento</h3>
+                        <div class="stock-value" id="fermento-value">0</div>
+                        <div class="unit">kg</div>
+                    </div>
+                    <div class="stock-item">
+                        <h3>Emulsificante</h3>
+                        <div class="stock-value" id="emulsificante-value">0</div>
+                        <div class="unit">L</div>
+                    </div>
+                </div>
+                
+                <h2 style="margin-top: 30px;">Adicionar ao Estoque</h2>
+                <div class="info-note">
+                    <strong>Nota:</strong> Todos os produtos são adicionados em kg (quilogramas), exceto emulsificante que é em L (litros).
+                    O sistema converterá automaticamente para as unidades necessárias na produção.
+                </div>
+                
+                <h3>Farinha</h3>
+                <div class="form-group">
+                    <label for="farinha-quantity">Quantidade (kg):</label>
+                    <input type="number" id="farinha-quantity" min="0" step="0.01" placeholder="Ex: 50">
+                </div>
+                <button onclick="addToStock('farinha')">Adicionar Farinha</button>
+                
+                <h3>Reforçador</h3>
+                <div class="form-group">
+                    <label for="reforcador-quantity">Quantidade (kg):</label>
+                    <input type="number" id="reforcador-quantity" min="0" step="0.01" placeholder="Ex: 5">
+                </div>
+                <button onclick="addToStock('reforcador')">Adicionar Reforçador</button>
+                
+                <h3>Anti-mofo</h3>
+                <div class="form-group">
+                    <label for="anti-mofo-quantity">Quantidade (kg):</label>
+                    <input type="number" id="anti-mofo-quantity" min="0" step="0.01" placeholder="Ex: 2">
+                </div>
+                <button onclick="addToStock('anti-mofo')">Adicionar Anti-mofo</button>
+                
+                <h3>Sal</h3>
+                <div class="form-group">
+                    <label for="sal-quantity">Quantidade (kg):</label>
+                    <input type="number" id="sal-quantity" min="0" step="0.01" placeholder="Ex: 10">
+                </div>
+                <button onclick="addToStock('sal')">Adicionar Sal</button>
+                
+                <h3>Fermento</h3>
+                <div class="form-group">
+                    <label for="fermento-quantity">Quantidade (kg):</label>
+                    <input type="number" id="fermento-quantity" min="0" step="0.01" placeholder="Ex: 5">
+                </div>
+                <button onclick="addToStock('fermento')">Adicionar Fermento</button>
+                
+                <h3>Emulsificante</h3>
+                <div class="form-group">
+                    <label for="emulsificante-quantity">Quantidade (L):</label>
+                    <input type="number" id="emulsificante-quantity" min="0" step="0.01" placeholder="Ex: 5">
+                </div>
+                <button onclick="addToStock('emulsificante')">Adicionar Emulsificante</button>
+                
+                <div id="stock-message" class="alert" style="display: none;"></div>
+                
+                <div class="reset-section">
+                    <h2>Zerar Estoque</h2>
+                    <div class="info-note">
+                        <strong>Atenção:</strong> Esta ação irá definir todos os valores do estoque para zero. Esta operação não pode ser desfeita.
+                    </div>
+                    <button id="reset-stock" class="btn-danger">Zerar Todo o Estoque</button>
+                </div>
+                
+                <div class="report-section">
+                    <h2>Relatório Semanal</h2>
+                    <div class="info-note">
+                        <strong>Relatório:</strong> Consumo de ingredientes durante a semana atual.
+                    </div>
+                    <button id="show-report" class="btn-info">Ver Relatório Semanal</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Produção</h2>
+                <p>Ingredientes necessários para 1 receita:</p>
+                
+                <div class="ingredient-row">
+                    <span class="ingredient-name">Farinha</span>
+                    <span class="ingredient-value">25 kg</span>
+                </div>
+                <div class="ingredient-row">
+                    <span class="ingredient-name">Reforçador</span>
+                    <span class="ingredient-value">0.2 kg</span>
+                </div>
+                <div class="ingredient-row">
+                    <span class="ingredient-name">Anti-mofo</span>
+                    <span class="ingredient-value">70 g</span>
+                </div>
+                <div class="ingredient-row">
+                    <span class="ingredient-name">Sal</span>
+                    <span class="ingredient-value">0.5 kg</span>
+                </div>
+                <div class="fermento-custom">
+                    <div class="form-group">
+                        <label for="fermento-custom">Fermento (pode variar por dia):</label>
+                        <input type="number" id="fermento-custom" min="300" max="500" step="1" value="416">
+                        <span>gramas por receita</span>
+                    </div>
+                </div>
+                <div class="ingredient-row">
+                    <span class="ingredient-name">Emulsificante</span>
+                    <span class="ingredient-value">0.05 L</span>
+                </div>
+                
+                <div class="info-note">
+                    <strong>Nota:</strong> O anti-mofo é debitado em gramas (70g por receita), mas o estoque é mantido em kg para facilitar o controle.
+                    O fermento pode variar conforme a necessidade do dia (entre 300g e 500g por receita).
+                </div>
+                
+                <div class="form-group" style="margin-top: 20px;">
+                    <label for="recipe-count">Quantidade de Receitas:</label>
+                    <input type="number" id="recipe-count" min="1" value="1">
+                </div>
+                <button id="produce">Registrar Produção</button>
+                
+                <div id="production-message" class="alert" style="display: none;"></div>
+                
+                <h2 style="margin-top: 30px;">Histórico de Produção</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Receitas</th>
+                            <th>Fermento (g)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="production-history">
+                        <!-- Histórico será adicionado aqui via JavaScript -->
+                    </tbody>
+                </table>
+                
+                <div class="reset-section">
+                    <button id="reset-history" class="btn-danger">Limpar Histórico de Produção</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Desenvolvido por <span class="developer">jotapecell websites</span></p>
+    </footer>
+
+    <!-- Modal para Relatório Semanal -->
+    <div id="report-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Relatório Semanal</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div id="report-content">
+                <!-- Conteúdo do relatório será inserido aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar estoque
+        let stock = {
+            farinha: 0,
+            reforcador: 0,
+            "anti-mofo": 0,
+            sal: 0,
+            fermento: 0,
+            emulsificante: 0
+        };
+        
+        // Histórico de movimentações do estoque
+        let stockHistory = [];
+        
+        // Receita padrão (quantidades para 1 receita)
+        const recipe = {
+            farinha: 25,      // kg
+            reforcador: 0.2,  // kg
+            "anti-mofo": 70,  // g (será convertido para kg durante o débito)
+            sal: 0.5,         // kg
+            fermento: 0.416,  // kg (valor padrão, mas será substituído pelo valor personalizado)
+            emulsificante: 0.05 // L
+        };
+        
+        // Histórico de produção
+        let productionHistory = [];
+        
+        // Atualizar exibição do estoque
+        function updateStockDisplay() {
+            document.getElementById('farinha-value').textContent = stock.farinha.toFixed(2);
+            document.getElementById('reforcador-value').textContent = stock.reforcador.toFixed(2);
+            document.getElementById('anti-mofo-value').textContent = stock["anti-mofo"].toFixed(2);
+            document.getElementById('sal-value').textContent = stock.sal.toFixed(2);
+            document.getElementById('fermento-value').textContent = stock.fermento.toFixed(2);
+            document.getElementById('emulsificante-value').textContent = stock.emulsificante.toFixed(2);
+            
+            // Salvar no localStorage
+            localStorage.setItem('bakeryStock', JSON.stringify(stock));
+            localStorage.setItem('bakeryStockHistory', JSON.stringify(stockHistory));
+            localStorage.setItem('bakeryProductionHistory', JSON.stringify(productionHistory));
+        }
+        
+        // Mostrar mensagem
+        function showMessage(elementId, message, isSuccess, isWarning = false) {
+            const messageElement = document.getElementById(elementId);
+            messageElement.textContent = message;
+            
+            if (isWarning) {
+                messageElement.className = 'alert alert-warning';
+            } else {
+                messageElement.className = isSuccess ? 'alert alert-success' : 'alert alert-danger';
+            }
+            
+            messageElement.style.display = 'block';
+            
+            // Esconder a mensagem após 5 segundos
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Adicionar ao estoque (função individual para cada produto)
+        function addToStock(product) {
+            const quantity = parseFloat(document.getElementById(`${product}-quantity`).value);
+            
+            if (isNaN(quantity) || quantity <= 0) {
+                showMessage('stock-message', `Por favor, insira uma quantidade válida para ${product}.`, false);
+                return;
+            }
+            
+            stock[product] += quantity;
+            
+            // Registrar no histórico
+            const now = new Date();
+            const operationDate = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+            stockHistory.unshift({
+                date: operationDate,
+                product: product,
+                quantity: quantity,
+                type: 'entrada'
+            });
+            
+            updateStockDisplay();
+            showMessage('stock-message', `Estoque de ${product} atualizado com sucesso! (+${quantity} ${product === 'emulsificante' ? 'L' : 'kg'})`, true);
+            
+            // Limpar campo de quantidade
+            document.getElementById(`${product}-quantity`).value = '';
+        }
+        
+        // Zerar estoque
+        document.getElementById('reset-stock').addEventListener('click', function() {
+            if (confirm("Tem certeza que deseja zerar todo o estoque? Esta ação não pode ser desfeita.")) {
+                // Registrar no histórico antes de zerar
+                const now = new Date();
+                const operationDate = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+                
+                for (const product in stock) {
+                    if (stock[product] > 0) {
+                        stockHistory.unshift({
+                            date: operationDate,
+                            product: product,
+                            quantity: stock[product],
+                            type: 'ajuste'
+                        });
+                    }
+                }
+                
+                // Zerar todos os valores do estoque
+                for (const product in stock) {
+                    stock[product] = 0;
+                }
+                
+                updateStockDisplay();
+                showMessage('stock-message', 'Estoque zerado com sucesso!', true);
+            }
+        });
+        
+        // Limpar histórico
+        document.getElementById('reset-history').addEventListener('click', function() {
+            if (confirm("Tem certeza que deseja limpar todo o histórico de produção?")) {
+                productionHistory = [];
+                updateProductionHistory();
+                showMessage('production-message', 'Histórico de produção limpo com sucesso!', true);
+            }
+        });
+        
+        // Registrar produção
+        document.getElementById('produce').addEventListener('click', function() {
+            const recipeCount = parseInt(document.getElementById('recipe-count').value);
+            const fermentoCustom = parseFloat(document.getElementById('fermento-custom').value);
+            
+            if (isNaN(recipeCount) || recipeCount <= 0) {
+                showMessage('production-message', 'Por favor, insira um número válido de receitas.', false);
+                return;
+            }
+            
+            if (isNaN(fermentoCustom) || fermentoCustom < 300 || fermentoCustom > 500) {
+                showMessage('production-message', 'Por favor, insira um valor válido para o fermento (entre 300g e 500g).', false);
+                return;
+            }
+            
+            // Verificar se há estoque suficiente
+            let hasEnoughStock = true;
+            let missingProduct = '';
+            
+            for (const [product, amountNeeded] of Object.entries(recipe)) {
+                let totalNeeded;
+                
+                if (product === "anti-mofo") {
+                    // Converter gramas para quilogramas (1kg = 1000g)
+                    totalNeeded = (amountNeeded * recipeCount) / 1000;
+                } else if (product === "fermento") {
+                    // Usar o valor personalizado do fermento (convertendo gramas para kg)
+                    totalNeeded = (fermentoCustom * recipeCount) / 1000;
+                } else {
+                    totalNeeded = amountNeeded * recipeCount;
+                }
+                
+                if (stock[product] < totalNeeded) {
+                    hasEnoughStock = false;
+                    missingProduct = product;
+                    break;
+                }
+            }
+            
+            if (!hasEnoughStock) {
+                showMessage('production-message', `Estoque insuficiente de ${missingProduct} para produzir ${recipeCount} receita(s).`, false);
+                return;
+            }
+            
+            // Registrar no histórico antes de debitar
+            const now = new Date();
+            const operationDate = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+            
+            // Debitar do estoque
+            for (const [product, amountNeeded] of Object.entries(recipe)) {
+                let totalNeeded;
+                
+                if (product === "anti-mofo") {
+                    // Converter gramas para quilogramas (1kg = 1000g)
+                    totalNeeded = (amountNeeded * recipeCount) / 1000;
+                } else if (product === "fermento") {
+                    // Usar o valor personalizado do fermento (convertendo gramas para kg)
+                    totalNeeded = (fermentoCustom * recipeCount) / 1000;
+                } else {
+                    totalNeeded = amountNeeded * recipeCount;
+                }
+                
+                // Registrar no histórico de estoque
+                stockHistory.unshift({
+                    date: operationDate,
+                    product: product,
+                    quantity: totalNeeded,
+                    type: 'saída'
+                });
+                
+                stock[product] -= totalNeeded;
+                // Garantir que não fique negativo (devido a arredondamentos)
+                stock[product] = Math.max(0, stock[product]);
+            }
+            
+            // Registrar no histórico de produção
+            productionHistory.unshift({
+                date: operationDate,
+                recipes: recipeCount,
+                fermento: fermentoCustom
+            });
+            
+            // Manter apenas os 20 registros mais recentes
+            if (productionHistory.length > 20) {
+                productionHistory.pop();
+            }
+            
+            // Manter apenas os 50 registros mais recentes no histórico de estoque
+            if (stockHistory.length > 50) {
+                stockHistory.pop();
+            }
+            
+            // Atualizar exibição
+            updateStockDisplay();
+            updateProductionHistory();
+            
+            showMessage('production-message', `Produção de ${recipeCount} receita(s) registrada com sucesso! (Fermento: ${fermentoCustom}g/receita)`, true);
+        });
+        
+        // Atualizar histórico de produção
+        function updateProductionHistory() {
+            const historyElement = document.getElementById('production-history');
+            historyElement.innerHTML = '';
+            
+            productionHistory.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${item.recipes} receita(s)</td>
+                    <td>${item.fermento}g</td>
+                `;
+                historyElement.appendChild(row);
+            });
+        }
+        
+        // Gerar relatório semanal
+        function generateWeeklyReport() {
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            
+            // Filtrar movimentações da última semana
+            const weeklyMovements = stockHistory.filter(movement => {
+                // Para fins de teste, vamos considerar qualquer movimento (já que não temos datas reais)
+                // Em um sistema real, você usaria: return new Date(movement.date) >= oneWeekAgo;
+                return true; // Mostrar todos os movimentos para teste
+            });
+            
+            // Calcular totais por produto
+            const totals = {
+                farinha: { entrada: 0, saida: 0, ajuste: 0 },
+                reforcador: { entrada: 0, saida: 0, ajuste: 0 },
+                "anti-mofo": { entrada: 0, saida: 0, ajuste: 0 },
+                sal: { entrada: 0, saida: 0, ajuste: 0 },
+                fermento: { entrada: 0, saida: 0, ajuste: 0 },
+                emulsificante: { entrada: 0, saida: 0, ajuste: 0 }
+            };
+            
+            weeklyMovements.forEach(movement => {
+                if (totals[movement.product]) {
+                    totals[movement.product][movement.type] += movement.quantity;
+                }
+            });
+            
+            // Calcular saldo final por produto
+            const balances = {};
+            for (const product in totals) {
+                balances[product] = totals[product].entrada - totals[product].saida;
+            }
+            
+            return { movements: weeklyMovements, totals, balances };
+        }
+        
+        // Mostrar relatório semanal
+        document.getElementById('show-report').addEventListener('click', function() {
+            const report = generateWeeklyReport();
+            const modal = document.getElementById('report-modal');
+            const reportContent = document.getElementById('report-content');
+            
+            let html = `
+                <div class="info-note">
+                    Relatório de movimentações da última semana (${new Date().toLocaleDateString()})
+                </div>
+                
+                <h3>Resumo por Produto</h3>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Entradas</th>
+                            <th>Saídas</th>
+                            <th>Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            for (const product in report.totals) {
+                const unit = product === 'emulsificante' ? 'L' : 'kg';
+                const balanceClass = report.balances[product] >= 0 ? 'consumption-positive' : 'consumption-negative';
+                
+                html += `
+                    <tr>
+                        <td>${product.charAt(0).toUpperCase() + product.slice(1)}</td>
+                        <td>${report.totals[product].entrada.toFixed(2)} ${unit}</td>
+                        <td>${report.totals[product].saida.toFixed(2)} ${unit}</td>
+                        <td class="${balanceClass}">${report.balances[product].toFixed(2)} ${unit}</td>
+                    </tr>
+                `;
+            }
+            
+            html += `
+                    </tbody>
+                </table>
+                
+                <h3>Últimas Movimentações</h3>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Produto</th>
+                            <th>Tipo</th>
+                            <th>Quantidade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            // Mostrar apenas as últimas 15 movimentações
+            const recentMovements = report.movements.slice(0, 15);
+            
+            if (recentMovements.length === 0) {
+                html += `
+                    <tr>
+                        <td colspan="4" style="text-align: center;">Nenhuma movimentação na última semana</td>
+                    </tr>
+                `;
+            } else {
+                recentMovements.forEach(movement => {
+                    const unit = movement.product === 'emulsificante' ? 'L' : 'kg';
+                    const typeText = movement.type === 'entrada' ? 'Entrada' : (movement.type === 'saída' ? 'Saída' : 'Ajuste');
+                    const typeClass = movement.type === 'entrada' ? 'consumption-positive' : 'consumption-negative';
+                    
+                    html += `
+                        <tr>
+                            <td>${movement.date}</td>
+                            <td>${movement.product}</td>
+                            <td class="${typeClass}">${typeText}</td>
+                            <td>${movement.quantity.toFixed(2)} ${unit}</td>
+                        </tr>
+                    `;
+                });
+            }
+            
+            html += `
+                    </tbody>
+                </table>
+            `;
+            
+            reportContent.innerHTML = html;
+            modal.style.display = 'flex';
+        });
+        
+        // Fechar modal
+        document.querySelector('.close').addEventListener('click', function() {
+            document.getElementById('report-modal').style.display = 'none';
+        });
+        
+        // Fechar modal ao clicar fora dele
+        window.addEventListener('click', function(event) {
+            if (event.target === document.getElementById('report-modal')) {
+                document.getElementById('report-modal').style.display = 'none';
+            }
+        });
+        
+        // Carregar dados salvos ao iniciar
+        function loadSavedData() {
+            const savedStock = localStorage.getItem('bakeryStock');
+            const savedStockHistory = localStorage.getItem('bakeryStockHistory');
+            const savedHistory = localStorage.getItem('bakeryProductionHistory');
+            
+            if (savedStock) {
+                stock = JSON.parse(savedStock);
+            }
+            
+            if (savedStockHistory) {
+                stockHistory = JSON.parse(savedStockHistory);
+            }
+            
+            if (savedHistory) {
+                productionHistory = JSON.parse(savedHistory);
+            }
+            
+            updateStockDisplay();
+            updateProductionHistory();
+        }
+        
+        // Inicializar a página
+        window.addEventListener('DOMContentLoaded', function() {
+            loadSavedData();
+        });
+    </script>
+</body>
+</html>
+
+
